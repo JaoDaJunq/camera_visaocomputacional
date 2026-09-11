@@ -15,162 +15,41 @@
         <h1 class="brandTitle">Gesture Cam</h1>
         <p class="brandSub">Um hub de experimentos com mãos, rosto, olhos, pose e movimento.</p>
       </div>
-      <div class="statusRow">
-        <span id="status" class="pill">Carregando MediaPipe...</span>
-        <span id="fps" class="pill">0 FPS</span>
-      </div>
+      <div class="statusRow"><span id="status" class="pill">Carregando MediaPipe...</span><span id="fps" class="pill">0 FPS</span></div>
     </header>
 
     <section id="hubView" class="view active">
-      <div class="sectionHead">
-        <div>
-          <h2>Experimentos</h2>
-          <p>Os módulos compartilham o mesmo Vision Core, Gesture Engine e Motion Engine.</p>
-        </div>
-      </div>
-
+      <div class="sectionHead"><div><h2>Experimentos</h2><p>Os módulos compartilham Vision Core, Gesture Engine e Motion Engine.</p></div></div>
       <div class="grid">
-        <button class="card" data-experience="draw">
-          <span class="tag ready">READY</span>
-          <div class="cardIcon">✍️</div>
-          <h3>Air Draw</h3>
-          <p>Desenhe no ar usando o indicador com suavização e confirmação de gesto.</p>
-        </button>
-
-        <button class="card" data-experience="emoji">
-          <span class="tag ready">READY</span>
-          <div class="cardIcon">🥊</div>
-          <h3>Emoji Playground</h3>
-          <p>Pegue, arremesse e acerte objetos usando pinça e velocidade da mão.</p>
-        </button>
-
-        <button class="card" data-experience="spell">
-          <span class="tag ready">READY</span>
-          <div class="cardIcon">🪄</div>
-          <h3>Spell Casting</h3>
-          <p>Desenhe círculos, Z e cortes no ar para ativar efeitos e poderes.</p>
-        </button>
-
-        <button class="card locked" data-soon="Eye Tracking">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">👁️</div>
-          <h3>Eye Tracking</h3>
-          <p>Calibração de olhar, cursor ocular, seleção por dwell e jogos de mira.</p>
-        </button>
-
-        <button class="card locked" data-soon="Face Lab">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">😶</div>
-          <h3>Face Lab</h3>
-          <p>Olhos, boca, sobrancelhas, direção da cabeça e expressões faciais.</p>
-        </button>
-
-        <button class="card locked" data-soon="Gesture Games">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">🎮</div>
-          <h3>Gesture Games</h3>
-          <p>Pong, Fruit Slice, Boxe, Goleiro, Brick Breaker, Eye Aim e mais.</p>
-        </button>
-
-        <button class="card locked" data-soon="Air DJ">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">🎵</div>
-          <h3>Air DJ</h3>
-          <p>Controle música, pads, pitch e efeitos usando distância e movimento das mãos.</p>
-        </button>
-
-        <button class="card locked" data-soon="Gesture Maps">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">🗺️</div>
-          <h3>Gesture Maps</h3>
-          <p>Pan, zoom e rotação de mapas completamente controlados por gestos.</p>
-        </button>
-
-        <button class="card locked" data-soon="Desktop Control">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">🖥️</div>
-          <h3>Desktop Control</h3>
-          <p>Mouse, scroll, cliques, volume e ações configuráveis no computador.</p>
-        </button>
-
-        <button class="card locked" data-soon="Camera FX">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">🎥</div>
-          <h3>Camera FX Studio</h3>
-          <p>Efeitos combinando mão, rosto, pose e olhar para OBS, Meet e Discord.</p>
-        </button>
-
-        <button class="card locked" data-soon="Presentation Controller">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">📊</div>
-          <h3>Presentation Controller</h3>
-          <p>Troque slides, use ponteiro virtual, desenhe e controle zoom no ar.</p>
-        </button>
-
-        <button class="card locked" data-soon="Vision Lab">
-          <span class="tag soon">SOON</span>
-          <div class="cardIcon">🧪</div>
-          <h3>Vision Lab</h3>
-          <p>Ferramentas técnicas para landmarks, gestos, velocidade, confiança e calibração.</p>
-        </button>
+        <button class="card" data-experience="draw"><span class="tag ready">READY</span><div class="cardIcon">✍️</div><h3>Air Draw</h3><p>Desenhe no ar usando o indicador com suavização e confirmação de gesto.</p></button>
+        <button class="card" data-experience="emoji"><span class="tag ready">READY</span><div class="cardIcon">🥊</div><h3>Emoji Playground</h3><p>Pegue, arremesse e acerte objetos usando pinça e velocidade da mão.</p></button>
+        <button class="card" data-experience="spell"><span class="tag ready">READY</span><div class="cardIcon">🪄</div><h3>Spell Casting</h3><p>Desenhe círculos, Z e cortes no ar para ativar efeitos e poderes.</p></button>
+        <button class="card" data-experience="face"><span class="tag ready">READY</span><div class="cardIcon">😶</div><h3>Face Lab</h3><p>Rastreie olhos, boca, sobrancelhas, sorriso e direção aproximada da cabeça.</p></button>
+        <button class="card" data-experience="eye"><span class="tag ready">BETA</span><div class="cardIcon">👁️</div><h3>Eye Tracking</h3><p>Cursor ocular experimental, calibração central e seleção por permanência do olhar.</p></button>
+        <button class="card locked" data-soon="Gesture Games"><span class="tag soon">SOON</span><div class="cardIcon">🎮</div><h3>Gesture Games</h3><p>Pong, Fruit Slice, Boxe, Goleiro, Brick Breaker, Eye Aim e mais.</p></button>
+        <button class="card locked" data-soon="Air DJ"><span class="tag soon">SOON</span><div class="cardIcon">🎵</div><h3>Air DJ</h3><p>Controle música, pads, pitch e efeitos usando distância e movimento das mãos.</p></button>
+        <button class="card locked" data-soon="Gesture Maps"><span class="tag soon">SOON</span><div class="cardIcon">🗺️</div><h3>Gesture Maps</h3><p>Pan, zoom e rotação de mapas completamente controlados por gestos.</p></button>
+        <button class="card locked" data-soon="Desktop Control"><span class="tag soon">SOON</span><div class="cardIcon">🖥️</div><h3>Desktop Control</h3><p>Mouse, scroll, cliques, volume e ações configuráveis no computador.</p></button>
+        <button class="card locked" data-soon="Camera FX"><span class="tag soon">SOON</span><div class="cardIcon">🎥</div><h3>Camera FX Studio</h3><p>Efeitos combinando mão, rosto, pose e olhar para OBS, Meet e Discord.</p></button>
+        <button class="card locked" data-soon="Presentation Controller"><span class="tag soon">SOON</span><div class="cardIcon">📊</div><h3>Presentation Controller</h3><p>Troque slides, use ponteiro virtual, desenhe e controle zoom no ar.</p></button>
+        <button class="card locked" data-soon="Vision Lab"><span class="tag soon">SOON</span><div class="cardIcon">🧪</div><h3>Vision Lab</h3><p>Ferramentas técnicas para landmarks, gestos, velocidade, confiança e calibração.</p></button>
       </div>
     </section>
 
     <section id="experienceView" class="view">
-      <div class="experienceTop">
-        <div class="experienceMeta">
-          <button id="backBtn" class="backBtn">← Hub</button>
-          <div class="experienceTitle">
-            <h2 id="experienceName">Experimento</h2>
-            <p id="experienceDesc">Descrição</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="stageWrap">
-        <div class="stage">
-          <video id="cam" autoplay playsinline muted></video>
-          <canvas id="paint"></canvas>
-          <canvas id="overlay"></canvas>
-
-          <div class="stageHud">
-            <div class="hudBox"><small>GESTO</small><strong id="gesture">Câmera desligada</strong></div>
-            <div class="hudBox"><small>MÃOS</small><strong id="hands">0</strong></div>
-            <div class="hudBox"><small>MODO</small><strong id="mode">-</strong></div>
-            <div id="hitBox" class="hudBox" style="display:none"><small>HITS</small><strong id="hits">0</strong></div>
-          </div>
-
-          <div id="hint" class="stageHint">
-            <strong>Gesture Cam Hub 👋</strong>
-            <span>Ligue a câmera para iniciar o módulo.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button id="cameraBtn" class="primaryBtn" disabled>Ligar câmera</button>
-        <button id="switchBtn" class="ghostBtn">🔄 Trocar câmera</button>
-        <div id="moduleActions" class="moduleActions"></div>
-        <label class="toggle"><input id="skeletonToggle" type="checkbox" checked>Esqueleto</label>
-        <label class="toggle"><input id="debugToggle" type="checkbox">Debug</label>
-      </div>
-
+      <div class="experienceTop"><div class="experienceMeta"><button id="backBtn" class="backBtn">← Hub</button><div class="experienceTitle"><h2 id="experienceName">Experimento</h2><p id="experienceDesc">Descrição</p></div></div></div>
+      <div class="stageWrap"><div class="stage">
+        <video id="cam" autoplay playsinline muted></video><canvas id="paint"></canvas><canvas id="overlay"></canvas>
+        <div class="stageHud"><div class="hudBox"><small>GESTO</small><strong id="gesture">Câmera desligada</strong></div><div class="hudBox"><small>MÃOS</small><strong id="hands">0</strong></div><div class="hudBox"><small>MODO</small><strong id="mode">-</strong></div><div id="hitBox" class="hudBox" style="display:none"><small>HITS</small><strong id="hits">0</strong></div></div>
+        <div id="hint" class="stageHint"><strong>Gesture Cam Hub 👋</strong><span>Ligue a câmera para iniciar o módulo.</span></div>
+      </div></div>
+      <div class="controls"><button id="cameraBtn" class="primaryBtn" disabled>Ligar câmera</button><button id="switchBtn" class="ghostBtn">🔄 Trocar câmera</button><div id="moduleActions" class="moduleActions"></div><label class="toggle"><input id="skeletonToggle" type="checkbox" checked>Esqueleto</label><label class="toggle"><input id="debugToggle" type="checkbox">Debug</label></div>
       <div id="helpGrid" class="helpGrid"></div>
-
-      <div id="debugPanel" class="debugPanel" style="display:none">
-        <div class="debugGrid">
-          <div class="debugItem"><small>RAW</small><strong id="debugRaw">-</strong></div>
-          <div class="debugItem"><small>CANDIDATO</small><strong id="debugCandidate">-</strong></div>
-          <div class="debugItem"><small>ATIVO</small><strong id="debugActive">-</strong></div>
-          <div class="debugItem"><small>VELOCIDADE</small><strong id="debugSpeed">0 px/s</strong></div>
-        </div>
-        <div class="debugBar"><span id="dwellBar"></span></div>
-      </div>
+      <div id="debugPanel" class="debugPanel" style="display:none"><div class="debugGrid"><div class="debugItem"><small>RAW</small><strong id="debugRaw">-</strong></div><div class="debugItem"><small>CANDIDATO</small><strong id="debugCandidate">-</strong></div><div class="debugItem"><small>ATIVO</small><strong id="debugActive">-</strong></div><div class="debugItem"><small>VELOCIDADE</small><strong id="debugSpeed">0 px/s</strong></div></div><div class="debugBar"><span id="dwellBar"></span></div></div>
     </section>
 
     <p class="footer">Gesture Cam Hub • processamento local no navegador • arquitetura modular</p>
   </main>
-
   <div id="toast" class="toast"></div>
   <script type="module" src="./js/app.js"></script>
 </body>
