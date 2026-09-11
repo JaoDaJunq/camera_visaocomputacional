@@ -1,7 +1,9 @@
 import { VisionCore, HAND_CONNECTIONS } from "./vision.js";
 import { GestureEngine, gestureLabel } from "./gesture-engine.js";
+import { MotionEngine } from "./motion-engine.js";
 import { AirDrawExperience } from "./experiences/air-draw.js";
 import { EmojiPlaygroundExperience } from "./experiences/emoji-playground.js";
+import { SpellCastingExperience } from "./experiences/spell-casting.js";
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -45,8 +47,10 @@ const vision = new VisionCore({
   onStatus: setStatus,
 });
 const gestureEngine = new GestureEngine({ dwellMs: 90, releaseGraceMs: 160, smoothingAlpha: .38 });
+const motionEngine = new MotionEngine({ maxAgeMs: 1300, minPointDistance: mobile ? 9 : 7 });
 const airDraw = new AirDrawExperience({ paintCanvas: paint });
 const emojiPlayground = new EmojiPlaygroundExperience();
+const spellCasting = new SpellCastingExperience();
 
 let running = false;
 let currentExperience = null;
@@ -79,6 +83,16 @@ const experienceMeta = {
       ["✌️ Paz", "Dispara partículas quando o gesto é confirmado."],
     ],
   },
+  spell: {
+    title: "Spell Casting",
+    desc: "Desenhe trajetórias no ar e transforme movimento em efeitos mágicos.",
+    help: [
+      ["⭕ Círculo", "Desenhe um círculo amplo para abrir um portal."],
+      ["⚡ Z", "Faça um Z no ar para disparar um raio."],
+      ["🗡️ Corte", "Faça um movimento reto e rápido para gerar um slash."],
+      ["☝️ Indicador", "As trajetórias só são gravadas com o indicador confirmado."],
+    ],
+  },
 };
 
 function emptyHand() {
@@ -94,7 +108,7 @@ function showToast(text) {
   toast.textContent = text;
   toast.classList.add("show");
   clearTimeout(showToast.t);
-  showToast.t = setTimeout(() => toast.classList.remove("show"), 1400);
+  showToast.t = setTimeout(() => toast.classList.remove("show"), 1500);
 }
 
 function openExperience(name) {
@@ -106,15 +120,14 @@ function openExperience(name) {
   experienceName.textContent = meta.title;
   experienceDesc.textContent = meta.desc;
   modeEl.textContent = meta.title;
-  paint.style.opacity = name === "draw" ? "1" : ".18";
+  paint.style.opacity = name === "draw" ? "1" : ".12";
   hitBox.style.display = name === "emoji" ? "block" : "none";
   airDraw.resetStroke();
+  motionEngine.reset();
   moduleActions.innerHTML = "";
   helpGrid.innerHTML = meta.help.map(([a,b]) => `<div class="helpCard"><b>${a}</b><span>${b}</span></div>`).join("");
 
-  if (name === "draw") {
-    addAction("Limpar desenho", () => airDraw.clear());
-  }
+  if (name === "draw") addAction("Limpar desenho", () => airDraw.clear());
   if (name === "emoji") {
     addAction("+ Emoji", () => emojiPlayground.spawn(overlay.width, overlay.height), true);
     addAction("Reset emojis", () => {
@@ -123,6 +136,9 @@ function openExperience(name) {
     });
     if (!emojiPlayground.emojis.length && overlay.width) emojiPlayground.reset(overlay.width, overlay.height);
   }
+  if (name === "spell") {
+    addAction("Limpar trilha", () => motionEngine.reset());
+  }
 }
 
 function closeExperience() {
@@ -130,6 +146,7 @@ function closeExperience() {
   experienceView.classList.remove("active");
   hubView.classList.add("active");
   airDraw.resetStroke();
+  motionEngine.reset();
 }
 
 function addAction(label, handler, accent = false) {
@@ -162,6 +179,7 @@ async function toggleCamera() {
     hint.innerHTML = "<strong>Gesture Cam Hub 👋</strong><span>Ligue a câmera para iniciar o módulo.</span>";
     oc.clearRect(0, 0, overlay.width, overlay.height);
     gestureEngine.reset();
+    motionEngine.reset();
     hand = emptyHand();
     return;
   }
@@ -239,6 +257,7 @@ function drawSkeleton(landmarks) {
 function render(now) {
   oc.clearRect(0,0,overlay.width,overlay.height);
   if (currentExperience === "emoji") emojiPlayground.render(oc, now);
+  if (currentExperience === "spell") spellCasting.render(oc, motionEngine.trail);
   for (const lm of lastLandmarks) drawSkeleton(lm);
   if (hand.point) {
     oc.save();
@@ -286,9 +305,18 @@ function loop(now = performance.now()) {
     updateHand(lastLandmarks[0], now);
     if (currentExperience === "draw") airDraw.update({ gesture: hand.gesture, point: hand.point });
     if (currentExperience === "emoji") emojiPlayground.update(hand, now, overlay.width);
+    if (currentExperience === "spell") {
+      const motion = motionEngine.update(hand.point, hand.gesture === "point", now);
+      if (motion) {
+        spellCasting.trigger(motion, now);
+        const names = { circle: "Portal detectado ⭕", lightning: "Raio detectado ⚡", slash: "Corte detectado 🗡️" };
+        showToast(names[motion.type] || motion.type);
+      }
+    }
     tickFps();
   }
   if (currentExperience === "emoji") emojiPlayground.physics(dt, overlay.width, overlay.height);
+  if (currentExperience === "spell") spellCasting.update(dt);
   render(now);
   updateDebug();
   raf = requestAnimationFrame(loop);
