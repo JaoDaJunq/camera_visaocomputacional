@@ -15,7 +15,8 @@ export class AbsoluteCinemaEffect{
     ctx.globalAlpha=.9*a;
     const bar=Math.max(28,h*.07);ctx.fillStyle='#000';ctx.fillRect(0,0,w,bar);ctx.fillRect(0,h-bar,w,bar);
     ctx.translate(w/2,h*.53);
-    const scale=1+Math.sin(Math.min(p,1)*Math.PI)*.035;ctx.scale(scale,scale);
+    const scale=1+Math.sin(Math.min(p,1)*Math.PI)*.035;
+    ctx.scale(-scale,scale);
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowBlur=28;ctx.shadowColor='rgba(255,255,255,.45)';
     ctx.fillStyle='#fff';ctx.font=`900 ${Math.max(34,w*.072)}px Georgia,serif`;ctx.fillText('ABSOLUTE',0,-Math.max(24,h*.045));
     ctx.font=`900 ${Math.max(42,w*.092)}px Georgia,serif`;ctx.fillText('CINEMA',0,Math.max(26,h*.045));
