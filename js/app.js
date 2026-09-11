@@ -41,13 +41,9 @@ const paint = $("#paint");
 const oc = overlay.getContext("2d");
 
 const mobile = matchMedia("(pointer:coarse)").matches;
-const vision = new VisionCore({
-  video,
-  maxHands: mobile ? 1 : 2,
-  onStatus: setStatus,
-});
+const vision = new VisionCore({ video, maxHands: mobile ? 1 : 2, onStatus: setStatus });
 const gestureEngine = new GestureEngine({ dwellMs: 90, releaseGraceMs: 160, smoothingAlpha: .38 });
-const motionEngine = new MotionEngine({ maxAgeMs: 1300, minPointDistance: mobile ? 9 : 7 });
+const motionEngine = new MotionEngine({ maxAgeMs: 1800, minPointDistance: mobile ? 9 : 7, minPoints: 7, cooldownMs: 420 });
 const airDraw = new AirDrawExperience({ paintCanvas: paint });
 const emojiPlayground = new EmojiPlaygroundExperience();
 const spellCasting = new SpellCastingExperience();
@@ -87,10 +83,10 @@ const experienceMeta = {
     title: "Spell Casting",
     desc: "Desenhe trajetórias no ar e transforme movimento em efeitos mágicos.",
     help: [
-      ["⭕ Círculo", "Desenhe um círculo amplo para abrir um portal."],
-      ["⚡ Z", "Faça um Z no ar para disparar um raio."],
-      ["🗡️ Corte", "Faça um movimento reto e rápido para gerar um slash."],
-      ["☝️ Indicador", "As trajetórias só são gravadas com o indicador confirmado."],
+      ["⭕ Portal", "Com o indicador, desenhe um círculo grande e feche a forma. Depois abaixe o dedo."],
+      ["⚡ Raio", "Desenhe um Z amplo, em qualquer lado por causa do espelhamento, e finalize o gesto."],
+      ["🗡️ Corte", "Faça um traço reto e rápido. Quanto mais limpo o movimento, melhor a detecção."],
+      ["☝️ Finalizar", "O feitiço é analisado quando você abaixa o indicador, evitando disparos no meio do desenho."],
     ],
   },
 };
@@ -98,18 +94,8 @@ const experienceMeta = {
 function emptyHand() {
   return { gesture: "none", raw: "none", candidate: "none", point: null, pinch: null, palm: null, vx: 0, vy: 0, speed: 0, progress: 0 };
 }
-
-function setStatus(text, type = "") {
-  statusEl.textContent = text;
-  statusEl.className = `pill ${type}`.trim();
-}
-
-function showToast(text) {
-  toast.textContent = text;
-  toast.classList.add("show");
-  clearTimeout(showToast.t);
-  showToast.t = setTimeout(() => toast.classList.remove("show"), 1500);
-}
+function setStatus(text, type = "") { statusEl.textContent = text; statusEl.className = `pill ${type}`.trim(); }
+function showToast(text) { toast.textContent = text; toast.classList.add("show"); clearTimeout(showToast.t); showToast.t = setTimeout(() => toast.classList.remove("show"), 1700); }
 
 function openExperience(name) {
   const meta = experienceMeta[name];
@@ -126,18 +112,15 @@ function openExperience(name) {
   motionEngine.reset();
   moduleActions.innerHTML = "";
   helpGrid.innerHTML = meta.help.map(([a,b]) => `<div class="helpCard"><b>${a}</b><span>${b}</span></div>`).join("");
-
   if (name === "draw") addAction("Limpar desenho", () => airDraw.clear());
   if (name === "emoji") {
     addAction("+ Emoji", () => emojiPlayground.spawn(overlay.width, overlay.height), true);
-    addAction("Reset emojis", () => {
-      emojiPlayground.reset(overlay.width, overlay.height);
-      hitsEl.textContent = "0";
-    });
+    addAction("Reset emojis", () => { emojiPlayground.reset(overlay.width, overlay.height); hitsEl.textContent = "0"; });
     if (!emojiPlayground.emojis.length && overlay.width) emojiPlayground.reset(overlay.width, overlay.height);
   }
   if (name === "spell") {
     addAction("Limpar trilha", () => motionEngine.reset());
+    addAction("Limpar efeitos", () => { spellCasting.effects = []; }, true);
   }
 }
 
@@ -148,7 +131,6 @@ function closeExperience() {
   airDraw.resetStroke();
   motionEngine.reset();
 }
-
 function addAction(label, handler, accent = false) {
   const btn = document.createElement("button");
   btn.className = `actionBtn${accent ? " accent" : ""}`;
@@ -156,77 +138,45 @@ function addAction(label, handler, accent = false) {
   btn.onclick = handler;
   moduleActions.appendChild(btn);
 }
-
 function resize() {
-  const w = video.videoWidth || 960;
-  const h = video.videoHeight || 540;
+  const w = video.videoWidth || 960, h = video.videoHeight || 540;
   const changed = overlay.width !== w || overlay.height !== h;
-  if (changed) {
-    overlay.width = w;
-    overlay.height = h;
-    emojiPlayground.reset(w, h);
-  }
+  if (changed) { overlay.width = w; overlay.height = h; emojiPlayground.reset(w, h); }
   airDraw.resize(w, h);
 }
 
 async function toggleCamera() {
   if (running) {
-    vision.stop();
-    running = false;
-    cancelAnimationFrame(raf);
-    cameraBtn.textContent = "Ligar câmera";
+    vision.stop(); running = false; cancelAnimationFrame(raf); cameraBtn.textContent = "Ligar câmera";
     hint.classList.remove("hidden");
     hint.innerHTML = "<strong>Gesture Cam Hub 👋</strong><span>Ligue a câmera para iniciar o módulo.</span>";
-    oc.clearRect(0, 0, overlay.width, overlay.height);
-    gestureEngine.reset();
-    motionEngine.reset();
-    hand = emptyHand();
-    return;
+    oc.clearRect(0, 0, overlay.width, overlay.height); gestureEngine.reset(); motionEngine.reset(); hand = emptyHand(); return;
   }
   try {
-    await vision.start();
-    resize();
-    running = true;
-    cameraBtn.textContent = "Desligar câmera";
-    hint.classList.add("hidden");
-    lastFrameTime = performance.now();
-    loop();
+    await vision.start(); resize(); running = true; cameraBtn.textContent = "Desligar câmera"; hint.classList.add("hidden"); lastFrameTime = performance.now(); loop();
   } catch (error) {
-    console.error(error);
-    setStatus("Câmera bloqueada", "err");
-    hint.classList.remove("hidden");
+    console.error(error); setStatus("Câmera bloqueada", "err"); hint.classList.remove("hidden");
     hint.innerHTML = "<strong>Não consegui abrir a câmera 😭</strong><span>Libere a permissão no navegador e tente novamente.</span>";
   }
 }
 
-function point(lm, i) {
-  return { x: lm[i].x * overlay.width, y: lm[i].y * overlay.height };
-}
-
-function avg(...pts) {
-  return { x: pts.reduce((s,p) => s + p.x, 0) / pts.length, y: pts.reduce((s,p) => s + p.y, 0) / pts.length };
-}
-
+function point(lm, i) { return { x: lm[i].x * overlay.width, y: lm[i].y * overlay.height }; }
+function avg(...pts) { return { x: pts.reduce((s,p) => s + p.x, 0) / pts.length, y: pts.reduce((s,p) => s + p.y, 0) / pts.length }; }
 function updateHand(landmarks, now) {
   if (!landmarks) {
     const snap = gestureEngine.update("none", now);
     hand = { ...emptyHand(), gesture: snap.active, raw: snap.raw, candidate: snap.candidate, progress: snap.progress };
-    lastHandSample = null;
-    return;
+    lastHandSample = null; return;
   }
-
   const raw = gestureEngine.classify(landmarks, overlay.width, overlay.height);
   const snap = gestureEngine.update(raw, now);
   const index = gestureEngine.smoothPoint(point(landmarks, 8));
-  const thumb = point(landmarks, 4);
-  const pinch = avg(index, thumb);
+  const thumb = point(landmarks, 4), pinch = avg(index, thumb);
   const palm = avg(point(landmarks,0), point(landmarks,5), point(landmarks,9), point(landmarks,13), point(landmarks,17));
   let vx = 0, vy = 0, speed = 0;
   if (lastHandSample) {
     const dt = Math.max((now - lastHandSample.t) / 1000, .001);
-    vx = (palm.x - lastHandSample.x) / dt;
-    vy = (palm.y - lastHandSample.y) / dt;
-    speed = Math.hypot(vx, vy);
+    vx = (palm.x - lastHandSample.x) / dt; vy = (palm.y - lastHandSample.y) / dt; speed = Math.hypot(vx, vy);
   }
   lastHandSample = { x: palm.x, y: palm.y, t: now };
   hand = { gesture: snap.active, raw: snap.raw, candidate: snap.candidate, progress: snap.progress, point: index, pinch, palm, vx, vy, speed };
@@ -234,82 +184,46 @@ function updateHand(landmarks, now) {
 
 function drawSkeleton(landmarks) {
   if (!skeletonToggle.checked) return;
-  oc.save();
-  oc.strokeStyle = "rgba(255,255,255,.62)";
-  oc.lineWidth = Math.max(2, overlay.width / 520);
-  for (const [a,b] of HAND_CONNECTIONS) {
-    const p1 = point(landmarks,a), p2 = point(landmarks,b);
-    oc.beginPath();
-    oc.moveTo(p1.x,p1.y);
-    oc.lineTo(p2.x,p2.y);
-    oc.stroke();
-  }
-  for (let i = 0; i < landmarks.length; i++) {
-    const p = point(landmarks,i);
-    oc.beginPath();
-    oc.arc(p.x,p.y,i===8?Math.max(7,overlay.width/110):Math.max(3,overlay.width/270),0,Math.PI*2);
-    oc.fillStyle = i===8 ? "#72ffd5" : "rgba(255,255,255,.9)";
-    oc.fill();
-  }
+  oc.save(); oc.strokeStyle = "rgba(255,255,255,.62)"; oc.lineWidth = Math.max(2, overlay.width / 520);
+  for (const [a,b] of HAND_CONNECTIONS) { const p1 = point(landmarks,a), p2 = point(landmarks,b); oc.beginPath(); oc.moveTo(p1.x,p1.y); oc.lineTo(p2.x,p2.y); oc.stroke(); }
+  for (let i = 0; i < landmarks.length; i++) { const p = point(landmarks,i); oc.beginPath(); oc.arc(p.x,p.y,i===8?Math.max(7,overlay.width/110):Math.max(3,overlay.width/270),0,Math.PI*2); oc.fillStyle = i===8 ? "#72ffd5" : "rgba(255,255,255,.9)"; oc.fill(); }
   oc.restore();
 }
-
 function render(now) {
   oc.clearRect(0,0,overlay.width,overlay.height);
   if (currentExperience === "emoji") emojiPlayground.render(oc, now);
   if (currentExperience === "spell") spellCasting.render(oc, motionEngine.trail);
   for (const lm of lastLandmarks) drawSkeleton(lm);
   if (hand.point) {
-    oc.save();
-    oc.beginPath();
-    oc.arc(hand.point.x, hand.point.y, Math.max(10, overlay.width/95), 0, Math.PI*2);
-    oc.fillStyle = hand.gesture === "point" ? "#72ffd5" : "#fff";
-    oc.shadowBlur = 18;
-    oc.shadowColor = oc.fillStyle;
-    oc.fill();
-    oc.restore();
+    oc.save(); oc.beginPath(); oc.arc(hand.point.x, hand.point.y, Math.max(10, overlay.width/95), 0, Math.PI*2);
+    oc.fillStyle = hand.gesture === "point" ? "#72ffd5" : "#fff"; oc.shadowBlur = 18; oc.shadowColor = oc.fillStyle; oc.fill(); oc.restore();
   }
 }
-
 function updateDebug() {
-  gestureEl.textContent = gestureLabel(hand.gesture);
-  handsEl.textContent = String(lastLandmarks.length);
-  debugRaw.textContent = gestureLabel(hand.raw);
-  debugCandidate.textContent = gestureLabel(hand.candidate);
-  debugActive.textContent = gestureLabel(hand.gesture);
-  debugSpeed.textContent = `${Math.round(hand.speed)} px/s`;
-  dwellBar.style.width = `${Math.round(hand.progress * 100)}%`;
+  gestureEl.textContent = gestureLabel(hand.gesture); handsEl.textContent = String(lastLandmarks.length);
+  debugRaw.textContent = gestureLabel(hand.raw); debugCandidate.textContent = gestureLabel(hand.candidate); debugActive.textContent = gestureLabel(hand.gesture);
+  debugSpeed.textContent = `${Math.round(hand.speed)} px/s`; dwellBar.style.width = `${Math.round(hand.progress * 100)}%`;
   debugPanel.style.display = debugToggle.checked ? "block" : "none";
   if (currentExperience === "emoji") hitsEl.textContent = String(emojiPlayground.hits);
 }
-
 function tickFps() {
-  frames++;
-  const now = performance.now();
-  const elapsed = now - fpsWindow;
-  if (elapsed >= 1000) {
-    fpsEl.textContent = `${Math.round(frames * 1000 / elapsed)} FPS`;
-    frames = 0;
-    fpsWindow = now;
-  }
+  frames++; const now = performance.now(), elapsed = now - fpsWindow;
+  if (elapsed >= 1000) { fpsEl.textContent = `${Math.round(frames * 1000 / elapsed)} FPS`; frames = 0; fpsWindow = now; }
 }
-
 function loop(now = performance.now()) {
   if (!running) return;
-  resize();
-  const dt = Math.min((now - lastFrameTime) / 1000, .04);
-  lastFrameTime = now;
+  resize(); const dt = Math.min((now - lastFrameTime) / 1000, .04); lastFrameTime = now;
   const result = vision.detect(now);
   if (result) {
-    lastLandmarks = result.landmarks || [];
-    updateHand(lastLandmarks[0], now);
+    lastLandmarks = result.landmarks || []; updateHand(lastLandmarks[0], now);
     if (currentExperience === "draw") airDraw.update({ gesture: hand.gesture, point: hand.point });
     if (currentExperience === "emoji") emojiPlayground.update(hand, now, overlay.width);
     if (currentExperience === "spell") {
-      const motion = motionEngine.update(hand.point, hand.gesture === "point", now);
+      const motion = motionEngine.update(hand.point, hand.gesture === "point", now, { width: overlay.width, height: overlay.height });
       if (motion) {
         spellCasting.trigger(motion, now);
-        const names = { circle: "Portal detectado ⭕", lightning: "Raio detectado ⚡", slash: "Corte detectado 🗡️" };
+        const pct = Math.round((motion.confidence ?? 1) * 100);
+        const names = { circle: `Portal detectado ⭕ • ${pct}%`, lightning: `Raio detectado ⚡ • ${pct}%`, slash: `Corte detectado 🗡️ • ${pct}%` };
         showToast(names[motion.type] || motion.type);
       }
     }
@@ -317,26 +231,14 @@ function loop(now = performance.now()) {
   }
   if (currentExperience === "emoji") emojiPlayground.physics(dt, overlay.width, overlay.height);
   if (currentExperience === "spell") spellCasting.update(dt);
-  render(now);
-  updateDebug();
-  raf = requestAnimationFrame(loop);
+  render(now); updateDebug(); raf = requestAnimationFrame(loop);
 }
 
 $$('[data-experience]').forEach(card => card.addEventListener("click", () => openExperience(card.dataset.experience)));
 $$('[data-soon]').forEach(card => card.addEventListener("click", () => showToast(`${card.dataset.soon} entra nas próximas etapas 👀`)));
-backBtn.onclick = closeExperience;
-cameraBtn.onclick = toggleCamera;
-switchBtn.onclick = async () => {
-  try { await vision.switchCamera(); resize(); }
-  catch (e) { console.error(e); showToast("Não consegui trocar a câmera"); }
-};
+backBtn.onclick = closeExperience; cameraBtn.onclick = toggleCamera;
+switchBtn.onclick = async () => { try { await vision.switchCamera(); resize(); } catch (e) { console.error(e); showToast("Não consegui trocar a câmera"); } };
 debugToggle.onchange = updateDebug;
 
-if (!navigator.mediaDevices?.getUserMedia) {
-  setStatus("Sem suporte à câmera", "err");
-} else {
-  vision.init().then(() => cameraBtn.disabled = false).catch(error => {
-    console.error(error);
-    setStatus("Erro ao carregar IA", "err");
-  });
-}
+if (!navigator.mediaDevices?.getUserMedia) setStatus("Sem suporte à câmera", "err");
+else vision.init().then(() => cameraBtn.disabled = false).catch(error => { console.error(error); setStatus("Erro ao carregar IA", "err"); });
