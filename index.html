@@ -13,7 +13,7 @@
       <div>
         <p class="brandEyebrow">MVP LABS • COMPUTER VISION PLAYGROUND</p>
         <h1 class="brandTitle">Gesture Cam</h1>
-        <p class="brandSub">Um hub de experimentos com mãos, rosto, olhos, pose e movimento.</p>
+        <p class="brandSub">Um hub de experimentos com mãos, rosto, olhos, pose, áudio e movimento.</p>
       </div>
       <div class="statusRow"><span id="status" class="pill">Carregando MediaPipe...</span><span id="fps" class="pill">0 FPS</span></div>
     </header>
@@ -27,11 +27,11 @@
         <button class="card" data-experience="face"><span class="tag ready">READY</span><div class="cardIcon">😶</div><h3>Face Lab</h3><p>Rastreie olhos, boca, sobrancelhas, sorriso e direção aproximada da cabeça.</p></button>
         <button class="card" data-experience="eye"><span class="tag ready">V2</span><div class="cardIcon">👁️</div><h3>Eye Tracking</h3><p>Calibração personalizada em 9 pontos, cursor ocular e teste de precisão.</p></button>
         <button class="card" data-experience="games"><span class="tag ready">V2</span><div class="cardIcon">🎮</div><h3>Gesture Games</h3><p>Pong, Fruit Slice, Brick Breaker, RPS, Boxe, Goleiro, Basquete e Eye Aim.</p></button>
-        <button class="card locked" data-soon="Air DJ"><span class="tag soon">SOON</span><div class="cardIcon">🎵</div><h3>Air DJ</h3><p>Controle música, pads, pitch e efeitos usando distância e movimento das mãos.</p></button>
+        <button class="card" data-experience="dj"><span class="tag ready">READY</span><div class="cardIcon">🎵</div><h3>Air DJ</h3><p>Synth, drum pads, BPM e filtro controlados pelas mãos com WebAudio.</p></button>
         <button class="card locked" data-soon="Gesture Maps"><span class="tag soon">SOON</span><div class="cardIcon">🗺️</div><h3>Gesture Maps</h3><p>Pan, zoom e rotação de mapas completamente controlados por gestos.</p></button>
         <button class="card locked" data-soon="Desktop Control"><span class="tag soon">SOON</span><div class="cardIcon">🖥️</div><h3>Desktop Control</h3><p>Mouse, scroll, cliques, volume e ações configuráveis no computador.</p></button>
         <button class="card locked" data-soon="Camera FX"><span class="tag soon">SOON</span><div class="cardIcon">🎥</div><h3>Camera FX Studio</h3><p>Efeitos combinando mão, rosto, pose e olhar para OBS, Meet e Discord.</p></button>
-        <button class="card locked" data-soon="Presentation Controller"><span class="tag soon">SOON</span><div class="cardIcon">📊</div><h3>Presentation Controller</h3><p>Troque slides, use ponteiro virtual, desenhe e controle zoom no ar.</p></button>
+        <button class="card" data-experience="presentation"><span class="tag ready">READY</span><div class="cardIcon">📊</div><h3>Presentation Controller</h3><p>Swipe para trocar slides, ponteiro virtual e anotações por pinça.</p></button>
         <button class="card locked" data-soon="Vision Lab"><span class="tag soon">SOON</span><div class="cardIcon">🧪</div><h3>Vision Lab</h3><p>Ferramentas técnicas para landmarks, gestos, velocidade, confiança e calibração.</p></button>
       </div>
     </section>
@@ -51,6 +51,6 @@
     <p class="footer">Gesture Cam Hub • processamento local no navegador • arquitetura modular</p>
   </main>
   <div id="toast" class="toast"></div>
-  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./js/app-v3.js"></script>
 </body>
 </html>
